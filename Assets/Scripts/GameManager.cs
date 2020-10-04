@@ -44,15 +44,20 @@ public class GameManager : MonoBehaviour
 
     public void Build()
     {
+        BuildText.SetActive(false);
+        Frame.SetActive(false);
+        Cursor.visible = true;
         for (int i = 0; i < Ghosts.transform.childCount-1; i++)
         {
             Ghosts.transform.GetChild(i).gameObject.SetActive(false);
         }
-
-        if (points > 0)
+        if(points > 0)
         {
             ControlText.SetActive(false);
             BuildText.SetActive(true);
+        }
+        if (points % 2 == 1)
+        {
             Frame.SetActive(true);
             int x = Random.Range(0, 3);
             GameObject go;
@@ -77,7 +82,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            BuildText.SetActive(false);
             Frame.SetActive(false);
         }
         BuildCanvas.gameObject.SetActive(true);
@@ -93,6 +97,7 @@ public class GameManager : MonoBehaviour
 
     public void Game()
     {
+        Cursor.visible = false;
         Player.Restart();
         BuildCanvas.gameObject.SetActive(false);
         GameCanvas.gameObject.SetActive(true);
@@ -110,6 +115,7 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
+        Cursor.visible = true;
         int BestScore = 0;
         if (PlayerPrefs.HasKey("dwamkgrkmklvsc"))
         {

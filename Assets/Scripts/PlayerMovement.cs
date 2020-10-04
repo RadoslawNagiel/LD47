@@ -15,6 +15,9 @@ public class PlayerMovement : MonoBehaviour
     List<Movement> saveMove;
     float delay;
     float teleportDelay;
+    float lostDelay;
+    bool dead = false;
+    bool move = false;
 
     void Start()
     {
@@ -29,64 +32,88 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (teleportDelay > 0)
-            teleportDelay -= Time.deltaTime;
+        if(move)
+        {
+            if (teleportDelay > 0)
+                teleportDelay -= Time.deltaTime;
 
-        bool jump = false;
+            bool jump = false;
 
-        int movement = 0;
-        if (Input.GetKey(KeyCode.A))
-        {
-            movement = -1;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            movement = 1;
-        }
+            int movement = 0;
+            if (Input.GetKey(KeyCode.A))
+            {
+                movement = -1;
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                movement = 1;
+            }
 
-        RaycastHit2D ray1 = Physics2D.Raycast(transform.position - new Vector3(.2f, .3f, 0), Vector2.down, 0.1f, LayerMask.GetMask("Default"));
-        RaycastHit2D ray2 = Physics2D.Raycast(transform.position - new Vector3(-.2f, .3f, 0), Vector2.down, 0.1f, LayerMask.GetMask("Default"));
-        RaycastHit2D hit1 = Physics2D.Raycast(transform.position + new Vector3(0, 0.15f, 0), Vector2.right * movement, 0.3f, LayerMask.GetMask("Default"));
-        RaycastHit2D hit2 = Physics2D.Raycast(transform.position + new Vector3(0, 0.3f, 0), Vector2.right * movement, 0.3f, LayerMask.GetMask("Default"));
-        RaycastHit2D hit3 = Physics2D.Raycast(transform.position, Vector2.right * movement, 0.3f, LayerMask.GetMask("Default"));
+            RaycastHit2D ray1 = Physics2D.Raycast(transform.position - new Vector3(.2f, .3f, 0), Vector2.down, 0.1f, LayerMask.GetMask("Default"));
+            RaycastHit2D ray2 = Physics2D.Raycast(transform.position - new Vector3(-.2f, .3f, 0), Vector2.down, 0.1f, LayerMask.GetMask("Default"));
+            RaycastHit2D hit1 = Physics2D.Raycast(transform.position + new Vector3(0, 0.15f, 0), Vector2.right * movement, 0.3f, LayerMask.GetMask("Default"));
+            RaycastHit2D hit2 = Physics2D.Raycast(transform.position + new Vector3(0, 0.3f, 0), Vector2.right * movement, 0.3f, LayerMask.GetMask("Default"));
+            RaycastHit2D hit3 = Physics2D.Raycast(transform.position, Vector2.right * movement, 0.3f, LayerMask.GetMask("Default"));
 
-        if (Input.GetKeyDown(KeyCode.Space) && (ray1 || ray2))
-        {
-            jump = true;
-            _rigidbody.velocity = new Vector2(0, 0);
-            _rigidbody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse);
-        }
+            if (Input.GetKeyDown(KeyCode.Space) && (ray1 || ray2))
+            {
+                jump = true;
+                _rigidbody.velocity = new Vector2(0, 0);
+                _rigidbody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse);
+            }
 
-        if (!hit1 && !hit2 && !hit3)
-        {
-            transform.position += new Vector3(movement, 0, 0) * Time.deltaTime * MovementSpeed;
-        }
-        Movement mv = saveMove[saveMove.Count - 1];
+            if (!hit1 && !hit2 && !hit3)
+            {
+                transform.position += new Vector3(movement, 0, 0) * Time.deltaTime * MovementSpeed;
+            }
+            Movement mv = saveMove[saveMove.Count - 1];
 
-        if (mv.movement != movement || mv.jump != jump)
-        {
-            saveMove[saveMove.Count - 1].time = delay;
-            delay = 0;
-            saveMove.Add(new Movement(movement, jump, 0));
-        }
-        delay += Time.deltaTime;
+            if (mv.movement != movement || mv.jump != jump)
+            {
+                saveMove[saveMove.Count - 1].time = delay;
+                delay = 0;
+                saveMove.Add(new Movement(movement, jump, 0));
+            }
+            delay += Time.deltaTime;
 
 
-        if (!(ray1 || ray2))
-        {
-            anim.Play("Jump");
+            if (!(ray1 || ray2))
+            {
+                anim.Play("Jump");
+            }
+            else if (movement == 1)
+            {
+                anim.Play("RunRight");
+            }
+            else if (movement == -1)
+            {
+                anim.Play("RunLeft");
+            }
+            else
+            {
+                anim.Play("Stay");
+            }
         }
-        else if (movement == 1)
+        if(dead)
         {
-            anim.Play("RunRight");
+            if (lostDelay < 0) 
+            {
+                GameManagerScript.GetComponent<GameManager>().GameOver();
+                gameObject.SetActive(false);
+            }
+            else
+            {
+                lostDelay -= Time.deltaTime;
+            }
         }
-        else if (movement == -1)
+    }
+
+    public void LetsGo()
+    {
+        move = true;
+        for (int i = 0; i < Ghosts.transform.childCount; i++)
         {
-            anim.Play("RunLeft");
-        }
-        else
-        {
-            anim.Play("Stay");
+            Ghosts.transform.GetChild(i).GetComponent<Repeate>().LetsGo();
         }
     }
 
@@ -102,34 +129,54 @@ public class PlayerMovement : MonoBehaviour
             this.jump = jump;
             this.time = time;
         }
+    }
 
-        public virtual string ToString()
+    public void Restart()
+    {
+        _rigidbody.simulated = true;
+        transform.position = pos;
+        dead = false;
+        gameObject.transform.Find("Character").gameObject.SetActive(true);
+        for (int i = 0; i < Ghosts.transform.childCount; i++)
         {
-            return "Ruch: " + movement.ToString() + " Skok " + jump.ToString() + " Czas: " + time.ToString();
+            Ghosts.transform.GetChild(i).gameObject.SetActive(true);
+            Ghosts.transform.GetChild(i).GetComponent<Repeate>().Restart();
         }
+        gameObject.SetActive(true);
+    }
+
+    public void lost()
+    {
+        if(!dead)
+        {
+            lostDelay = 2f;
+            move = false;
+            dead = true;
+        }
+    }
+
+    public void GenerateGhost()
+    {
+        saveMove[saveMove.Count - 1].time = delay+0.2f;
+
+        GameObject go = Instantiate(Resources.Load("Ghost") as GameObject, Ghosts.transform);
+        go.GetComponent<Repeate>().MovementSpeed = MovementSpeed;
+        go.GetComponent<Repeate>().pos = pos;
+        go.GetComponent<Repeate>().JumpForce = JumpForce;
+        go.GetComponent<Repeate>().MovementToRepeate = new List<Movement>(saveMove);
+
+        saveMove.Clear();
+        saveMove.Add(new Movement(0, false, 0));
+        delay = 0;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.transform.tag == "Finish")
         {
-            for (int i = 0; i < Ghosts.transform.childCount; i++)
-            {
-                Ghosts.transform.GetChild(i).GetComponent<Repeate>().Restart();
-            }
-            saveMove[saveMove.Count - 1].time = delay;
-
-            GameObject go = Instantiate(Resources.Load("Ghost") as GameObject, Ghosts.transform);
-            go.transform.position = pos;
-            go.GetComponent<Repeate>().MovementSpeed = MovementSpeed;
-            go.GetComponent<Repeate>().JumpForce = JumpForce;
-            go.GetComponent<Repeate>().MovementToRepeate = new List<Movement>(saveMove);
-
-            saveMove.Clear();
-            saveMove.Add(new Movement(0, false, 0));
-            delay = 0;
-            transform.position = pos;
-            GameManagerScript.Build();
+            gameObject.transform.Find("Character").gameObject.SetActive(false);
+            collision.GetComponent<Finish>().PlayerEnter();
+            move = false;
         }
         else if (collision.gameObject.tag == "Teleport")
         {
@@ -145,6 +192,22 @@ public class PlayerMovement : MonoBehaviour
                 }
                 teleportDelay = 1f;
             }
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Bomb")
+        {
+            _rigidbody.simulated = false;
+            collision.gameObject.GetComponent<Bomb>().Boom();
+            GetComponent<ParticleSystem>().Play();
+            lost();
+        }
+        else if (collision.gameObject.tag == "Spike")
+        {
+            GetComponent<ParticleSystem>().Play();
+            lost();
         }
     }
 }

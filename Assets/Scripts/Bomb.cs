@@ -12,7 +12,7 @@ public class Bomb : MonoBehaviour
         {
             if (delay > 0)
             {
-                if(delay<0.6)
+                if(delay<0.5)
                 {
                     GetComponent<SpriteRenderer>().enabled = false;
                 }
@@ -40,6 +40,6 @@ public class Bomb : MonoBehaviour
         GetComponent<SpriteRenderer>().enabled = true;
         GetComponent<CircleCollider2D>().enabled = false;
         gameObject.SetActive(true);
-        delay = 1f;
+        delay = 0.8f;
     }
 }

@@ -18,6 +18,7 @@ public class PlayerMovement : MonoBehaviour
     float lostDelay;
     bool dead = false;
     bool move = false;
+    bool points = false;
 
     void Start()
     {
@@ -95,12 +96,13 @@ public class PlayerMovement : MonoBehaviour
                 anim.Play("Stay");
             }
         }
-        if(dead)
+        if(dead && !points)
         {
             if (lostDelay < 0) 
             {
                 GameManagerScript.GetComponent<GameManager>().GameOver();
                 gameObject.transform.Find("Character").gameObject.SetActive(false);
+                points = true;
             }
             else
             {
@@ -151,6 +153,7 @@ public class PlayerMovement : MonoBehaviour
         if(!dead)
         {
             lostDelay = 2f;
+            points = false;
             move = false;
             dead = true;
         }

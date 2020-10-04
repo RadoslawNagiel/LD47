@@ -67,6 +67,7 @@ public class Repeate : MonoBehaviour
             {
                 if (indexjump != index)
                 {
+                    GetComponent<AudioSource>().Play();
                     _rigidbody.velocity = new Vector2(0, 0);
                     _rigidbody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse);
                     indexjump = index;
@@ -157,6 +158,7 @@ public class Repeate : MonoBehaviour
         }
         else if (collision.gameObject.tag == "Spike")
         {
+            collision.gameObject.GetComponent<AudioSource>().Play();
             GetComponent<ParticleSystem>().Play();
             lost();
         }

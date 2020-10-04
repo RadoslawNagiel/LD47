@@ -8,17 +8,27 @@ public class Finish : MonoBehaviour
     [SerializeField] PlayerMovement PlayerScript;
     float delay;
     bool start = false;
+    bool snd = false;
 
     void Update()
     {
         if (start == true)
         {
-            if (delay > 0)
+            if (delay <= 0)
+            {
+                if (!snd)
+                {
+                    GetComponent<AudioSource>().Play();
+                    snd = true;
+                }
+                GetComponent<Animator>().Play("FlyAnim");
+            }
+            if (delay > -1)
                 delay -= Time.deltaTime;
             else
             {
-                GetComponent<Animator>().Play("FlyAnim");
                 start = false;
+                snd = false;
                 PlayerScript.GenerateGhost();
                 gamemanager.AddPoint();
                 gamemanager.Build();

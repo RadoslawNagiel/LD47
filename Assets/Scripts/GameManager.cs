@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] PlayerMovement Player;
     [SerializeField] GameObject finish;
     [SerializeField] GameObject BuildText;
+    [SerializeField] GameObject ControlText;
     [SerializeField] GameObject Frame;
     [SerializeField] GameObject Ghosts;
 
@@ -50,6 +51,7 @@ public class GameManager : MonoBehaviour
 
         if (points > 0)
         {
+            ControlText.SetActive(false);
             BuildText.SetActive(true);
             Frame.SetActive(true);
             int x = Random.Range(0, 3);
@@ -122,6 +124,7 @@ public class GameManager : MonoBehaviour
         }
         EndScore.text = "SCORE: " + points + "\n BEST SCORE: " + BestScore;
         points = 0;
+        Frame.SetActive(false);
         EndCanvas.gameObject.SetActive(true);
         BuildCanvas.gameObject.SetActive(false);
         GameCanvas.gameObject.SetActive(false);

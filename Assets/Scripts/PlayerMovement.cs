@@ -57,6 +57,7 @@ public class PlayerMovement : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space) && (ray1 || ray2))
             {
+                GetComponent<AudioSource>().Play();
                 jump = true;
                 _rigidbody.velocity = new Vector2(0, 0);
                 _rigidbody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse);
@@ -99,7 +100,7 @@ public class PlayerMovement : MonoBehaviour
             if (lostDelay < 0) 
             {
                 GameManagerScript.GetComponent<GameManager>().GameOver();
-                gameObject.SetActive(false);
+                gameObject.transform.Find("Character").gameObject.SetActive(false);
             }
             else
             {
@@ -206,6 +207,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (collision.gameObject.tag == "Spike")
         {
+            collision.gameObject.GetComponent<AudioSource>().Play();
             GetComponent<ParticleSystem>().Play();
             lost();
         }

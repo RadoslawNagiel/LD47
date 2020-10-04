@@ -13,6 +13,10 @@ public class MouseMove : MonoBehaviour
             Vector3 pz = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             pz.z = 0;
             gameObject.transform.position = pz;
+            if(Input.GetKey(KeyCode.R))
+            {
+                transform.Rotate(0, 0, 1);
+            }
         }
     }
 

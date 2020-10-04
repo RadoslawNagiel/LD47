@@ -30,6 +30,7 @@ public class Bomb : MonoBehaviour
             GetComponent<ParticleSystem>().Play();
             GetComponent<CircleCollider2D>().enabled = true;
             start = true;
+            GetComponent<AudioSource>().Play();
         }
     }
 
